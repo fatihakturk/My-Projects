@@ -24,18 +24,29 @@ Resources:
       InstanceType: t2.micro
       KeyName: ec2_key
       SecurityGroupIds:
-        !Ref WebServerSecurityGroup
+        - !Ref WebServerSecurityGroup
       Tags:
         - Key: Name
-          Value: Web Server of ${AWS::StackName} Stack
+          Value: !Sub Web Server of ${AWS::StackName} Stack
       UserData:
         Fn::Base64:
           !Sub |
             #! /bin/bash
             yum update -y
             yum install httpd -y
+            FOLDER="https://raw.githubusercontent.com/fatihakturk/My-Projects/main/AWS/projects/Project-101-kittens-carousel-static-website-ec2/static-web"
             cd /var/www/html
-      Volumes:
-        Volumes
+            wget $FOLDER/index.html
+            wget $FOLDER/cat0.jpg
+            wget $FOLDER/cat1.jpg
+            wget $FOLDER/cat2.jpg
+            wget $FOLDER/cat3.png
+            systemctl start httpd
+            systemctl enable httpd
      
 Outputs:
+  WebsiteURL:
+    Value:  !Sub
+      - http://${PublicAddress}
+      - PublicAddress: !GetAtt WebServerHost.PublicDnsName
+    Description: Kittens Carousel Application URL
